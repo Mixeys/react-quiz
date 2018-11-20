@@ -4,6 +4,8 @@ import classes from "./Quiz.module.css";
 
 import ActiveQuiz from "../../components/ActiveQuiz/ActiveQuiz";
 import FinishedQuiz from "../../components/FinishedQuiz/FinishedQuiz";
+import axios from '../../axios/axios-quiz';
+import Loader from "../../components/UI/Loader/Loader";
 
 class Quiz extends Component {
   state = {
@@ -11,30 +13,8 @@ class Quiz extends Component {
     isFinised: false,
     activeQuestion: 0,
     answerState: null,
-    quiz: [
-      {
-        id: 1,
-        question: "What color is the sky?",
-        rightAnswerId: 3,
-        answers: [
-          { text: "Black", id: 1 },
-          { text: "Green", id: 2 },
-          { text: "Blue", id: 3 },
-          { text: "Yellow", id: 4 }
-        ]
-      },
-      {
-        id: 2,
-        question: "In which year was founded Nikolaev?",
-        rightAnswerId: 1,
-        answers: [
-          { text: "1789", id: 1 },
-          { text: "1785", id: 2 },
-          { text: "1778", id: 3 },
-          { text: "1783", id: 4 }
-        ]
-      }
-    ]
+    quiz: [],
+    loading: true
   };
 
   onAnswerClickHandler = answerId => {
@@ -89,8 +69,18 @@ class Quiz extends Component {
       })
   }
 
-  componentDidMount() {
-    console.log('Quiz ID = ', this.props.match.params.id);
+  async componentDidMount() {
+    try {
+      const response = await axios.get(`/quizes/${this.props.match.params.id}.json`);
+      const quiz = response.data;
+      this.setState({
+        quiz,
+        loading: false,
+      })
+    } catch (e) {
+      console.log(e)
+    }
+    console.log('Quiz ID = ', ); 
   }
 
 
@@ -99,7 +89,9 @@ class Quiz extends Component {
       <div className={classes.Quiz}>
         <div className={classes.QuizWrapper}>
           <h1>Answer all the questions.</h1>
-          {this.state.isFinised ? (
+          {this.state.loading
+          ? <Loader />
+          : this.state.isFinised ? (
             <FinishedQuiz
                 results={this.state.results}
                 quiz={this.state.quiz}
